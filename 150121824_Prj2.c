@@ -111,6 +111,9 @@ Node* rightRotate(Node *node) {
     return left;
 }
 
+
+//TODO Make another function for binary search tree insertion
+
 Node* insert(Node *node, int data) {
     //If tree is empty
     if (node == NULL) {
@@ -200,11 +203,38 @@ Node* insert(Node *node, int data) {
     return node;
 }
 
-
-
+//Preorder traversal
+void preorder(Node *node) {
+    if (node != NULL) {
+        printf("%d ", node->data);
+        preorder(node->left);
+        preorder(node->right);
+    }
+}
 
 
 
 int main() {
+    printf("Program started\n");
+    //File reading
+    FILE *file;
+    file = fopen("../input1.txt", "r");
+    if (file == NULL) {
+        printf("File not found");
+        return 0;
+    }
+    int data;
+    fscanf(file, "%d", &data);
+    Node *node = newNode(data);
+    while (fscanf(file, "%d", &data) != EOF) {
+        node = insert(node, data);
+    }
+    fclose(file);
+    //print the tree
 
+    preorder(node);
+    printf("\n");
+    printf("Program finished");
+
+    return 0;
 }
