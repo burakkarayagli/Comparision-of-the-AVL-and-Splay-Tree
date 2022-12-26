@@ -6,9 +6,18 @@
 #include <stdlib.h>
 #include <string.h>
 
+int compareCounterAVL = 0;
+int rotateCounterAVL = 0;
+
+int *compareCounterAVLptr = &compareCounterAVL;
+int *rotateCounterAVLptr = &rotateCounterAVL;
 
 int max(int a, int b) {
     return (a > b) ? a : b;
+}
+
+void increase(int *counter) {
+    *counter += 1;
 }
 
 typedef struct Node {
@@ -57,6 +66,7 @@ T1   b     Left Rotate(a)       a      c
 
 //Rotation function
 Node* leftRotate(Node* node) {
+    increase(rotateCounterAVLptr);
     //node is a
 
     //If we call the leftRotate function, so this means there is a right child.
@@ -92,6 +102,7 @@ Node* leftRotate(Node* node) {
 
 //Rotation function
 Node* rightRotate(Node *node) {
+    increase(rotateCounterAVLptr);
     //node is a
 
     //Reverse of the left rotate. Same logic
@@ -121,13 +132,16 @@ Node* insert(Node *node, int data) {
     }
     //Binary search tree inserting
     if (data < node->data) {
+        increase(compareCounterAVLptr);
         node->left = insert(node->left, data);
     }
     else if (data > node->data) {
+        increase(compareCounterAVLptr);
         node->right = insert(node->right, data);
     }
     //If node already exists
     else {
+        increase(compareCounterAVLptr);
         return node;
     }
 
@@ -218,7 +232,7 @@ int main() {
     printf("Program started\n");
     //File reading
     FILE *file;
-    file = fopen("../input1.txt", "r");
+    file = fopen("../input2.txt", "r");
     if (file == NULL) {
         printf("File not found");
         return 0;
@@ -234,6 +248,10 @@ int main() {
 
     preorder(node);
     printf("\n");
+    printf("Compare counter: %d\n", compareCounterAVL);
+    printf("Rotate counter: %d\n", rotateCounterAVL);
+    //Sum
+    printf("Sum: %d\n", compareCounterAVL + rotateCounterAVL);
     printf("Program finished");
 
     return 0;
