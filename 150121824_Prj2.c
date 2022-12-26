@@ -27,6 +27,7 @@ Node* newNode(int data) {
     return node;
 }
 
+//Getting height of the node
 int getHeight(Node *node) {
     if (node == NULL) {
         return 0;
@@ -34,7 +35,7 @@ int getHeight(Node *node) {
     return node->height;
 }
 
-
+//Calculating balance factor
 int getBalanceFactor(Node *node) {
     if (node == NULL) {
         return 0;
@@ -57,11 +58,18 @@ T1   b     Left Rotate(a)       a      c
 //Rotation function
 Node* leftRotate(Node* node) {
     //node is a
+
+    //If we call the leftRotate function, so this means there is a right child.
     Node* right = node->right;  //b
+    //But we don't know if there is a left child of right.
+    //If there is we attach the left of right to the node.
+    //If there isn't it means it is NULL. So we attach the node's right to the null.
+    //So we don't need to check if it is null or not.
     Node* leftOfRight = right->left; //T2
 
     //After this operation, the right node will be the root node
     //And the node will be the left node of the right node
+    //Or node's right will be NULL
     right->left = node;
     node->right = leftOfRight;
 
@@ -85,6 +93,8 @@ Node* leftRotate(Node* node) {
 //Rotation function
 Node* rightRotate(Node *node) {
     //node is a
+
+    //Reverse of the left rotate. Same logic
     Node *left = node->left; //b
     Node *rightOfLeft = left->right; //T3
 
@@ -101,11 +111,100 @@ Node* rightRotate(Node *node) {
     return left;
 }
 
+Node* insert(Node *node, int data) {
+    //If tree is empty
+    if (node == NULL) {
+        return newNode(data);
+    }
+    //Binary search tree inserting
+    if (data < node->data) {
+        node->left = insert(node->left, data);
+    }
+    else if (data > node->data) {
+        node->right = insert(node->right, data);
+    }
+    //If node already exists
+    else {
+        return node;
+    }
+
+    //Updating height
+    node->height = 1 + max(getHeight(node->left), getHeight(node->right));
+
+    //Calculating balance factor
+    //If factor is greater than 1, this means we should rotate to the right side. Left-Left or Left-Right
+    //If it is less than -1, this means we should rotate to the left side. Right-Right or Right-Left
+    int balanceFactor = getBalanceFactor(node);
+
+
+    //Left Left node=x
+    /*
+
+             x
+            /
+           y
+          /
+         z
+
+    */
+
+    if (balanceFactor > 1 && data < node->left->data) {
+        return rightRotate(node);
+    }
+
+    //Right Right node=x
+    /*
+
+        x
+         \
+          y
+           \
+            z
+
+     */
+    if (balanceFactor < -1 && data > node->right->data) {
+        return leftRotate(node);
+    }
+
+    //Left Right node=x
+    /*
+
+        x
+       /
+      y
+       \
+        z
+
+     */
+    if (balanceFactor > 1 && data > node->left->data) {
+        node->left = leftRotate(node->left);
+        return rightRotate(node);
+    }
+
+    //Right Left node=x
+    /*
+
+           x
+            \
+             y
+            /
+           z
+
+
+     */
+    if (balanceFactor < -1 && data < node->right->data) {
+        node->right = rightRotate(node->right);
+        return leftRotate(node);
+    }
+
+    return node;
+}
+
+
 
 
 
 
 int main() {
-    printf("Hello, World!");
-    return 0;
+
 }
