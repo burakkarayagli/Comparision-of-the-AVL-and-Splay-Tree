@@ -28,7 +28,7 @@ typedef struct Node{
     struct Node *right;
 }Node;
 
-Node* newNodeAVL(int data) {
+Node* newNode(int data) {
     Node *node = (Node*)malloc(sizeof(Node));
     node->data = data;
     node->height = 1;
@@ -67,7 +67,7 @@ T1   b     Left Rotate(a)       a      c
  */
 
 //Rotation function
-Node* leftRotateAVL(Node* node) {
+Node* leftRotate(Node* node) {
     //node is a
 
     //If we call the leftRotate function, so this means there is a right child.
@@ -102,7 +102,7 @@ Node* leftRotateAVL(Node* node) {
 */
 
 //Rotation function
-Node* rightRotateAVL(Node *node) {
+Node* rightRotate(Node *node) {
     //node is a
 
     //Reverse of the left rotate. Same logic
@@ -128,7 +128,7 @@ Node* rightRotateAVL(Node *node) {
 Node* insertAVL(Node *node, int data) {
     //If tree is empty
     if (node == NULL) {
-        return newNodeAVL(data);
+        return newNode(data);
     }
     //Binary search tree inserting
     if (data < node->data) {
@@ -168,7 +168,7 @@ Node* insertAVL(Node *node, int data) {
 
     if (balanceFactor > 1 && data < node->left->data) {
         increase(rotateCounterAVLptr);
-        return rightRotateAVL(node);
+        return rightRotate(node);
     }
 
     //Right Right node=x
@@ -183,7 +183,7 @@ Node* insertAVL(Node *node, int data) {
      */
     if (balanceFactor < -1 && data > node->right->data) {
         increase(rotateCounterAVLptr);
-        return leftRotateAVL(node);
+        return leftRotate(node);
     }
 
     //Left Right node=x
@@ -197,9 +197,9 @@ Node* insertAVL(Node *node, int data) {
 
      */
     if (balanceFactor > 1 && data > node->left->data) {
-        node->left = leftRotateAVL(node->left);increase(rotateCounterAVLptr);
+        node->left = leftRotate(node->left);increase(rotateCounterAVLptr);
         increase(rotateCounterAVLptr);
-        return rightRotateAVL(node);
+        return rightRotate(node);
     }
 
     //Right Left node=x
@@ -214,9 +214,9 @@ Node* insertAVL(Node *node, int data) {
 
      */
     if (balanceFactor < -1 && data < node->right->data) {
-        node->right = rightRotateAVL(node->right);increase(rotateCounterAVLptr);
+        node->right = rightRotate(node->right);increase(rotateCounterAVLptr);
         increase(rotateCounterAVLptr);
-        return leftRotateAVL(node);
+        return leftRotate(node);
     }
 
     return node;
@@ -232,6 +232,90 @@ void preorder(Node *node) {
 }
 
 
+//Splay Tree
+/*
+ * 1- target is the root, then return target
+ * 2- target is the left child of root and target does not have grand parent, RightRotate(root)
+ * 3- target is the right child of root and target does not have grand parent, LeftRotate(root)
+ * 4- target is the left of left of root so first RotateRight(root), the new root is the root's left child, then RotateRight(root) again
+ * 5- target is the right of right of root so first LeftRotate(root), the new root is the root's right child, then RotateLeft(root) again
+ * 6- target is right of left of root so first LeftRotate(root->left), after rotation root's left child is target, then RotateRight(root)
+ * 7- target is the
+ */
+
+Node* splay(Node *root, int data) {
+
+    //Target is root - CASE 1
+    if (root->data == data) {
+        return root;
+    }
+
+    //Target is in the left of tree - CASE 2,4,6
+    if (data < root->data) {
+
+        //If target is left of the root - CASE 2
+        if (data == root->left->data) {
+            return rightRotate(root);
+        }
+        //If target is left left - CASE 4
+        else if (data == root->left->left->data) {
+            return rightRotate(root);
+        }
+        //left right - CASE 6
+        else if (data == root->left->right->data) {
+            root->left = leftRotate(root->left);
+            return rightRotate(root);
+        }
+        else {
+            splay(root->left->left, data);
+        }
+    }
+    //Target is in the right of tree - CASE 3,5,7
+    else {
+        //If target is right of the root - CASE 3
+        if (data == root->right->data) {
+            return leftRotate(root);
+        }
+        //If target is right right - CASE 5
+        else if (data == root->right->right->data) {
+            return leftRotate(root);
+        }
+        //right left - CASE 7
+        else if (data == root->right->left->data) {
+            root->right = rightRotate(root->right);
+            return leftRotate(root);
+        }
+        else {
+            splay(root->right->right, data);
+        }
+    }
+}
+
+//Binary Search Tree insertion
+Node* insertBST(Node *node, int data) {
+    //If tree is empty
+    if (node == NULL) {
+        return newNode(data);
+    }
+    //Binary search tree inserting
+    if (data < node->data) {
+        node->left = insertBST(node->left, data);
+    }
+    else if (data > node->data) {
+        node->right = insertBST(node->right, data);
+    }
+    //If node already exists
+    else {
+        node->frequency += 1;
+        return node;
+    }
+    return node;
+}
+
+Node* insertSplay(Node *node, int data) {
+    insertBST(node, data);
+    return splay(node, data);
+}
 
 
 
@@ -246,19 +330,23 @@ int main() {
     }
     int data;
     fscanf(file, "%d", &data);
-    Node *node = newNodeAVL(data);
+    Node *node = newNode(data);
+    Node *node2 = newNode(data);
+    printf("CHECKPOINT 1\n");
     while (fscanf(file, "%d", &data) != EOF) {
         node = insertAVL(node, data);
+        node2 = insertSplay(node2, data);
     }
     fclose(file);
     //print the tree
 
     preorder(node);
     printf("\n");
-    printf("Compare counter: %d\n", compareCounterAVL);
-    printf("Rotate counter: %d\n", rotateCounterAVL);
+    //printf("Compare counter: %d\n", compareCounterAVL);
+    //printf("Rotate counter: %d\n", rotateCounterAVL);
     //Sum
-    printf("Sum: %d\n", compareCounterAVL + rotateCounterAVL);
+    printf("AVL: %d\n", compareCounterAVL + rotateCounterAVL);
+
     printf("Program finished");
 
     return 0;
