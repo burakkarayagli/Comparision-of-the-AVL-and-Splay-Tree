@@ -23,6 +23,7 @@ void increase(int *counter) {
 typedef struct Node {
     int data;
     int height;
+    int frequency;
     struct Node *left;
     struct Node *right;
 }Node;
@@ -31,6 +32,7 @@ Node* newNode(int data) {
     Node *node = (Node*)malloc(sizeof(Node));
     node->data = data;
     node->height = 1;
+    node->frequency = 1;
     node->left = NULL;
     node->right = NULL;
     return node;
@@ -142,6 +144,7 @@ Node* insert(Node *node, int data) {
     //If node already exists
     else {
         increase(compareCounterAVLptr);
+        node->frequency += 1;
         return node;
     }
 
