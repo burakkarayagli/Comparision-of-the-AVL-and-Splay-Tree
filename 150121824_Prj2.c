@@ -20,7 +20,7 @@ void increase(int *counter) {
     *counter += 1;
 }
 
-typedef struct Node {
+typedef struct Node{
     int data;
     int height;
     int frequency;
@@ -28,7 +28,7 @@ typedef struct Node {
     struct Node *right;
 }Node;
 
-Node* newNode(int data) {
+Node* newNodeAVL(int data) {
     Node *node = (Node*)malloc(sizeof(Node));
     node->data = data;
     node->height = 1;
@@ -38,7 +38,7 @@ Node* newNode(int data) {
     return node;
 }
 
-//Getting height of the node
+//Getting height of the node --AVL Tree
 int getHeight(Node *node) {
     if (node == NULL) {
         return 0;
@@ -46,7 +46,7 @@ int getHeight(Node *node) {
     return node->height;
 }
 
-//Calculating balance factor
+//Calculating balance factor --AVL Tree
 int getBalanceFactor(Node *node) {
     if (node == NULL) {
         return 0;
@@ -67,8 +67,7 @@ T1   b     Left Rotate(a)       a      c
  */
 
 //Rotation function
-Node* leftRotate(Node* node) {
-    increase(rotateCounterAVLptr);
+Node* leftRotateAVL(Node* node) {
     //node is a
 
     //If we call the leftRotate function, so this means there is a right child.
@@ -103,8 +102,7 @@ Node* leftRotate(Node* node) {
 */
 
 //Rotation function
-Node* rightRotate(Node *node) {
-    increase(rotateCounterAVLptr);
+Node* rightRotateAVL(Node *node) {
     //node is a
 
     //Reverse of the left rotate. Same logic
@@ -124,22 +122,22 @@ Node* rightRotate(Node *node) {
     return left;
 }
 
-
+//TODO Make rotate function checks which function to call and call it
 //TODO Make another function for binary search tree insertion
 
-Node* insert(Node *node, int data) {
+Node* insertAVL(Node *node, int data) {
     //If tree is empty
     if (node == NULL) {
-        return newNode(data);
+        return newNodeAVL(data);
     }
     //Binary search tree inserting
     if (data < node->data) {
         increase(compareCounterAVLptr);
-        node->left = insert(node->left, data);
+        node->left = insertAVL(node->left, data);
     }
     else if (data > node->data) {
         increase(compareCounterAVLptr);
-        node->right = insert(node->right, data);
+        node->right = insertAVL(node->right, data);
     }
     //If node already exists
     else {
@@ -169,7 +167,8 @@ Node* insert(Node *node, int data) {
     */
 
     if (balanceFactor > 1 && data < node->left->data) {
-        return rightRotate(node);
+        increase(rotateCounterAVLptr);
+        return rightRotateAVL(node);
     }
 
     //Right Right node=x
@@ -183,7 +182,8 @@ Node* insert(Node *node, int data) {
 
      */
     if (balanceFactor < -1 && data > node->right->data) {
-        return leftRotate(node);
+        increase(rotateCounterAVLptr);
+        return leftRotateAVL(node);
     }
 
     //Left Right node=x
@@ -197,8 +197,9 @@ Node* insert(Node *node, int data) {
 
      */
     if (balanceFactor > 1 && data > node->left->data) {
-        node->left = leftRotate(node->left);
-        return rightRotate(node);
+        node->left = leftRotateAVL(node->left);increase(rotateCounterAVLptr);
+        increase(rotateCounterAVLptr);
+        return rightRotateAVL(node);
     }
 
     //Right Left node=x
@@ -213,8 +214,9 @@ Node* insert(Node *node, int data) {
 
      */
     if (balanceFactor < -1 && data < node->right->data) {
-        node->right = rightRotate(node->right);
-        return leftRotate(node);
+        node->right = rightRotateAVL(node->right);increase(rotateCounterAVLptr);
+        increase(rotateCounterAVLptr);
+        return leftRotateAVL(node);
     }
 
     return node;
@@ -231,20 +233,22 @@ void preorder(Node *node) {
 
 
 
+
+
 int main() {
     printf("Program started\n");
     //File reading
     FILE *file;
-    file = fopen("../input2.txt", "r");
+    file = fopen("../input1.txt", "r");
     if (file == NULL) {
         printf("File not found");
         return 0;
     }
     int data;
     fscanf(file, "%d", &data);
-    Node *node = newNode(data);
+    Node *node = newNodeAVL(data);
     while (fscanf(file, "%d", &data) != EOF) {
-        node = insert(node, data);
+        node = insertAVL(node, data);
     }
     fclose(file);
     //print the tree
