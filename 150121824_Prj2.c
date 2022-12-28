@@ -6,11 +6,19 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define COUNT 10
+
 int compareCounterAVL = 0;
 int rotateCounterAVL = 0;
 
 int *compareCounterAVLptr = &compareCounterAVL;
 int *rotateCounterAVLptr = &rotateCounterAVL;
+
+int compareCounterSPLAY = 0;
+int rotateCounterSPLAY = 0;
+
+int *compareCounterSPLAYptr = &compareCounterSPLAY;
+int *rotateCounterSPLAYptr = &rotateCounterSPLAY;
 
 int max(int a, int b) {
     return (a > b) ? a : b;
@@ -231,6 +239,36 @@ void preorder(Node *node) {
     }
 }
 
+void print2DUtil(struct Node* root, int space)
+{
+    // Base case
+    if (root == NULL)
+        return;
+
+    // Increase distance between levels
+    space += COUNT;
+
+    // Process right child first
+    print2DUtil(root->right, space);
+
+    // Print current node after space
+    // count
+    printf("\n");
+    for (int i = COUNT; i < space; i++)
+        printf(" ");
+    printf("%d\n", root->data);
+
+    // Process left child
+    print2DUtil(root->left, space);
+}
+
+// Wrapper over print2DUtil()
+void print2D(struct Node* root)
+{
+    // Pass initial space count as 0
+    print2DUtil(root, 0);
+}
+
 
 //Splay Tree
 /*
@@ -243,8 +281,7 @@ void preorder(Node *node) {
  * 7- target is the
  */
 
-Node* splay(Node *root, int data) {
-
+Node* splay1(Node *root, int data) {
     //Target is root - CASE 1
     if (root->data == data) {
         return root;
@@ -255,20 +292,21 @@ Node* splay(Node *root, int data) {
 
         //If target is left of the root - CASE 2
         if (root->left != NULL && data == root->left->data) {
-            root = rightRotate(root);
-            return root;
+            rightRotate(root);
         }
         //If target is left left - CASE 4
-        else if (root->left->left != NULL && data == root->left->left->data) {
-            return rightRotate(root);
+        else if (root->left != NULL && data < root->left->data) {
+            root->left->left = splay1(root->left->left, data);
+            rightRotate(root);
         }
         //left right - CASE 6
-        else if (root->left->right != NULL && data == root->left->right->data) {
-            root->left = leftRotate(root->left);
-            return rightRotate(root);
+        else if (root->left != NULL && data > root->left->data) {
+            root->left->right = splay1(root->left->right, data);
+            rightRotate(root);
         }
         else {
-            root->left->left = splay(root->left->left, data);
+            root->left = splay1(root->left, data);
+            return root->left;
         }
     }
     //Target is in the right of tree - CASE 3,5,7
@@ -284,13 +322,142 @@ Node* splay(Node *root, int data) {
         //right left - CASE 7
         else if (root->right->left != NULL && data == root->right->left->data) {
             root->right = rightRotate(root->right);
-            return leftRotate(root);
+            root = leftRotate(root);
+            return root;
         }
         else {
-            root->right->right = splay(root->right->right, data);
+            root->right = splay1(root->right, data);
+            return root->right;
         }
     }
 }
+
+Node* splay2(Node *root, int data) {
+
+    //Target is root - CASE 1
+    if (root->data == data) {
+        return root;
+    }
+
+    //Target is in the left of tree - CASE 2,4,6
+    if (data < root->data) {
+
+        //If target is left of the root - CASE 2
+        if (root->left != NULL && data == root->left->data) {
+            root = rightRotate(root);
+            return root;
+        }
+            //If target is left left - CASE 4
+        else if (root->left->left != NULL && data == root->left->left->data) {
+            return rightRotate(root);
+        }
+            //left right - CASE 6
+        else if (root->left->right != NULL && data == root->left->right->data) {
+            root->left = leftRotate(root->left);
+            return rightRotate(root);
+        }
+        else {
+            root->left->left = splay2(root->left->left, data);
+        }
+    }
+        //Target is in the right of tree - CASE 3,5,7
+    else {
+        //If target is right of the root - CASE 3
+        if (root->right != NULL && data == root->right->data) {
+            return leftRotate(root);
+        }
+            //If target is right right - CASE 5
+        else if (root->right->right != NULL && data == root->right->right->data) {
+            return leftRotate(root);
+        }
+            //right left - CASE 7
+        else if (root->right->left != NULL && data == root->right->left->data) {
+            root->right = rightRotate(root->right);
+            return leftRotate(root);
+        }
+        else {
+            root->right->right = splay2(root->right->right, data);
+        }
+    }
+}
+
+
+/*
+ * Recursive splay tree
+ * if target is root, return root
+ * if root's right is target, then leftRotate(root)
+ * elif root's left is target, the rightRotate(root)
+ * else: we should determine where is the target
+ * if right side of the right child, splay for recursive, then
+ */
+
+Node* splay3(Node *root, int data) {
+    if (root == NULL || root->data == data) {
+        return root;
+    }
+
+    if (root->data > data) {
+        //increase(compareCounterSPLAYptr);
+        if (root->left == NULL) {
+            return root;
+        }
+
+        //Left left
+        if (root->left->data > data) {
+            //increase(compareCounterSPLAYptr);
+            root->left->left = splay3(root->left->left, data);
+            increase(rotateCounterSPLAYptr);
+            root = rightRotate(root);
+        }
+        else if (root->left->data < data) {
+            //increase(compareCounterSPLAYptr);
+            root->left->right = splay3(root->left->right, data);
+            if (root->left->right != NULL) {
+                increase(rotateCounterSPLAYptr);
+                root->left = leftRotate(root->left);
+            }
+        }
+        if (root->left == NULL) {
+            return root;
+        }
+        else {
+            increase(rotateCounterSPLAYptr);
+            return rightRotate(root);
+        }
+    }
+    else {
+        if (root->right == NULL) {
+            return root;
+        }
+
+        if (root->right->data > data) {
+            //increase(compareCounterSPLAYptr);
+            root->right->left = splay3(root->right->left, data);
+            if (root->right->left != NULL) {
+                increase(rotateCounterSPLAYptr);
+                root->right = rightRotate(root->right);
+            }
+        }
+        else if (root->right->data < data) {
+            //increase(compareCounterSPLAYptr);
+            root->right->right = splay3(root->right->right, data);
+            increase(rotateCounterSPLAYptr);
+            root = leftRotate(root);
+        }
+        if (root->right == NULL) {
+            return root;
+        }
+        else {
+            increase(rotateCounterSPLAYptr);
+            return leftRotate(root);
+        }
+    }
+
+
+
+}
+
+
 
 //Binary Search Tree insertion
 Node* insertBST(Node *node, int data) {
@@ -300,13 +467,16 @@ Node* insertBST(Node *node, int data) {
     }
     //Binary search tree inserting
     if (data < node->data) {
+        increase(compareCounterSPLAYptr);
         node->left = insertBST(node->left, data);
     }
     else if (data > node->data) {
+        increase(compareCounterSPLAYptr);
         node->right = insertBST(node->right, data);
     }
     //If node already exists
     else {
+        increase(compareCounterSPLAYptr);
         node->frequency += 1;
         return node;
     }
@@ -315,18 +485,28 @@ Node* insertBST(Node *node, int data) {
 
 Node* insertSplay(Node *node, int data) {
     insertBST(node, data);
-    return splay(node, data);
+    return splay3(node, data);
+}
+
+void printPreOrder(Node *node) {
+    if (node == NULL) {
+        return;
+    }
+    if (node->frequency > 1) {
+        printf("%d(%d) ", node->data, node->frequency);
+    }
+    printPreOrder(node->left);
+    printPreOrder(node->right);
 }
 
 
-
 int main() {
-    printf("Program started\n");
+    //printf("Program started\n");
     //Node *deneme = newNode(215);
     //printf("%d", deneme->left->data);
     //File reading
     FILE *file;
-    file = fopen("../input1.txt", "r");
+    file = fopen("../input2.txt", "r");
     if (file == NULL) {
         printf("File not found");
         return 0;
@@ -335,24 +515,36 @@ int main() {
     fscanf(file, "%d", &data);
     Node *node = newNode(data);
     Node *node2 = newNode(data);
-    printf("CHECKPOINT 1\n");
+    //printf("CHECKPOINT 1\n");
     while (fscanf(file, "%d", &data) != EOF) {
-        printf("CHECKPOINT 2\n");
+        //printf("CHECKPOINT 2\n");
         node = insertAVL(node, data);
         node2 = insertSplay(node2, data);
+        //print2D(node2);
+        //printf("======================\n");
     }
     fclose(file);
     //print the tree
 
+    printf("AVL Tree:\n");
     preorder(node);
     printf("\n");
     //printf("Compare counter: %d\n", compareCounterAVL);
     //printf("Rotate counter: %d\n", rotateCounterAVL);
     //Sum
-    printf("AVL: %d\n", compareCounterAVL + rotateCounterAVL);
-    preorder(node2);
+    printf("Total Cost: %d\n", compareCounterAVL + rotateCounterAVL);
 
-    printf("Program finished");
+    //printPreOrder(node);
+    printf("\n");
+
+    printf("Splay Tree:\n");
+    preorder(node2);
+    printf("\n");
+    //printf("Compare counter: %d\n", compareCounterSPLAY);
+    //printf("Rotate counter: %d\n", rotateCounterSPLAY);
+    //Sum
+    printf("Total Cost: %d\n", compareCounterSPLAY + rotateCounterSPLAY);
+    //printf("Program finished");
 
     return 0;
 }
