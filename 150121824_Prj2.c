@@ -254,39 +254,40 @@ Node* splay(Node *root, int data) {
     if (data < root->data) {
 
         //If target is left of the root - CASE 2
-        if (data == root->left->data) {
-            return rightRotate(root);
+        if (root->left != NULL && data == root->left->data) {
+            root = rightRotate(root);
+            return root;
         }
         //If target is left left - CASE 4
-        else if (data == root->left->left->data) {
+        else if (root->left->left != NULL && data == root->left->left->data) {
             return rightRotate(root);
         }
         //left right - CASE 6
-        else if (data == root->left->right->data) {
+        else if (root->left->right != NULL && data == root->left->right->data) {
             root->left = leftRotate(root->left);
             return rightRotate(root);
         }
         else {
-            splay(root->left->left, data);
+            root->left->left = splay(root->left->left, data);
         }
     }
     //Target is in the right of tree - CASE 3,5,7
     else {
         //If target is right of the root - CASE 3
-        if (data == root->right->data) {
+        if (root->right != NULL && data == root->right->data) {
             return leftRotate(root);
         }
         //If target is right right - CASE 5
-        else if (data == root->right->right->data) {
+        else if (root->right->right != NULL && data == root->right->right->data) {
             return leftRotate(root);
         }
         //right left - CASE 7
-        else if (data == root->right->left->data) {
+        else if (root->right->left != NULL && data == root->right->left->data) {
             root->right = rightRotate(root->right);
             return leftRotate(root);
         }
         else {
-            splay(root->right->right, data);
+            root->right->right = splay(root->right->right, data);
         }
     }
 }
@@ -321,6 +322,8 @@ Node* insertSplay(Node *node, int data) {
 
 int main() {
     printf("Program started\n");
+    //Node *deneme = newNode(215);
+    //printf("%d", deneme->left->data);
     //File reading
     FILE *file;
     file = fopen("../input1.txt", "r");
@@ -334,6 +337,7 @@ int main() {
     Node *node2 = newNode(data);
     printf("CHECKPOINT 1\n");
     while (fscanf(file, "%d", &data) != EOF) {
+        printf("CHECKPOINT 2\n");
         node = insertAVL(node, data);
         node2 = insertSplay(node2, data);
     }
@@ -346,6 +350,7 @@ int main() {
     //printf("Rotate counter: %d\n", rotateCounterAVL);
     //Sum
     printf("AVL: %d\n", compareCounterAVL + rotateCounterAVL);
+    preorder(node2);
 
     printf("Program finished");
 
