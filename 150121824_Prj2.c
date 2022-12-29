@@ -230,6 +230,90 @@ Node* insertAVL(Node *node, int data) {
     return node;
 }
 
+
+Node* splay(Node *root, int target) {
+
+    if (root->data == target) {
+        return root;
+    }
+
+    //target sag taraftaysa
+    if (root->data < target) {
+
+        //target sag cocuk
+        if (target == root->right->data) {
+            root = leftRotate(root);
+            return root;
+        }
+
+        //target sagin soluysa
+        if (root->right->left != NULL && target == root->right->left->data) {
+            root->right = rightRotate(root->right);
+            root = leftRotate(root);
+            return root;
+        }
+
+        //target sagin sagiysa
+        if (root->right->right != NULL && target == root->right->right->data) {
+            root = leftRotate(root);
+            root = leftRotate(root);
+            return root;
+        }
+
+        //target sagin sol tarafindaysa
+        if (target < root->right->data) {
+            root->right = splay(root->right, target);
+            root = leftRotate(root);
+            return root;
+        }
+
+        //target sagin sag tarafindaysa
+        if (root->right->data < target) {
+            root->right = splay(root->right, target);
+            root = leftRotate(root);
+        }
+    }
+    else {
+        //target sol cocuk
+        if (target == root->left->data) {
+            root = rightRotate(root);
+            return root;
+        }
+
+        //target solun soluysa
+        if (root->left->left != NULL && target == root->left->left->data) {
+            root = rightRotate(root);
+            root = rightRotate(root);
+            return root;
+        }
+
+        //target solun sagiysa
+        if (target == root->left->right->data) {
+            root->left = leftRotate(root->left);
+            root = rightRotate(root);
+            return root;
+        }
+
+        //target solun sol tarafindaysa
+        if (target < root->left->data) {
+            root->left = splay(root->left, target);
+            root = rightRotate(root);
+            return root;
+        }
+
+        //target solun sag tarafindaysa
+        if (root->left->data < target) {
+            root->left = splay(root->left, target);
+            root = rightRotate(root);
+            return root;
+        }
+
+
+    }
+
+}
+
+
 //Preorder traversal
 void preorder(Node *node) {
     if (node != NULL) {
@@ -270,193 +354,6 @@ void print2D(struct Node* root)
 }
 
 
-//Splay Tree
-/*
- * 1- target is the root, then return target
- * 2- target is the left child of root and target does not have grand parent, RightRotate(root)
- * 3- target is the right child of root and target does not have grand parent, LeftRotate(root)
- * 4- target is the left of left of root so first RotateRight(root), the new root is the root's left child, then RotateRight(root) again
- * 5- target is the right of right of root so first LeftRotate(root), the new root is the root's right child, then RotateLeft(root) again
- * 6- target is right of left of root so first LeftRotate(root->left), after rotation root's left child is target, then RotateRight(root)
- * 7- target is the
- */
-
-Node* splay1(Node *root, int data) {
-    //Target is root - CASE 1
-    if (root->data == data) {
-        return root;
-    }
-
-    //Target is in the left of tree - CASE 2,4,6
-    if (data < root->data) {
-
-        //If target is left of the root - CASE 2
-        if (root->left != NULL && data == root->left->data) {
-            rightRotate(root);
-        }
-        //If target is left left - CASE 4
-        else if (root->left != NULL && data < root->left->data) {
-            root->left->left = splay1(root->left->left, data);
-            rightRotate(root);
-        }
-        //left right - CASE 6
-        else if (root->left != NULL && data > root->left->data) {
-            root->left->right = splay1(root->left->right, data);
-            rightRotate(root);
-        }
-        else {
-            root->left = splay1(root->left, data);
-            return root->left;
-        }
-    }
-    //Target is in the right of tree - CASE 3,5,7
-    else {
-        //If target is right of the root - CASE 3
-        if (root->right != NULL && data == root->right->data) {
-            return leftRotate(root);
-        }
-        //If target is right right - CASE 5
-        else if (root->right->right != NULL && data == root->right->right->data) {
-            return leftRotate(root);
-        }
-        //right left - CASE 7
-        else if (root->right->left != NULL && data == root->right->left->data) {
-            root->right = rightRotate(root->right);
-            root = leftRotate(root);
-            return root;
-        }
-        else {
-            root->right = splay1(root->right, data);
-            return root->right;
-        }
-    }
-}
-
-Node* splay2(Node *root, int data) {
-
-    //Target is root - CASE 1
-    if (root->data == data) {
-        return root;
-    }
-
-    //Target is in the left of tree - CASE 2,4,6
-    if (data < root->data) {
-
-        //If target is left of the root - CASE 2
-        if (root->left != NULL && data == root->left->data) {
-            root = rightRotate(root);
-            return root;
-        }
-            //If target is left left - CASE 4
-        else if (root->left->left != NULL && data == root->left->left->data) {
-            return rightRotate(root);
-        }
-            //left right - CASE 6
-        else if (root->left->right != NULL && data == root->left->right->data) {
-            root->left = leftRotate(root->left);
-            return rightRotate(root);
-        }
-        else {
-            root->left->left = splay2(root->left->left, data);
-        }
-    }
-        //Target is in the right of tree - CASE 3,5,7
-    else {
-        //If target is right of the root - CASE 3
-        if (root->right != NULL && data == root->right->data) {
-            return leftRotate(root);
-        }
-            //If target is right right - CASE 5
-        else if (root->right->right != NULL && data == root->right->right->data) {
-            return leftRotate(root);
-        }
-            //right left - CASE 7
-        else if (root->right->left != NULL && data == root->right->left->data) {
-            root->right = rightRotate(root->right);
-            return leftRotate(root);
-        }
-        else {
-            root->right->right = splay2(root->right->right, data);
-        }
-    }
-}
-
-
-/*
- * Recursive splay tree
- * if target is root, return root
- * if root's right is target, then leftRotate(root)
- * elif root's left is target, the rightRotate(root)
- * else: we should determine where is the target
- * if right side of the right child, splay for recursive, then
- */
-
-Node* splay3(Node *root, int data) {
-    if (root == NULL || root->data == data) {
-        return root;
-    }
-
-    if (root->data > data) {
-        //increase(compareCounterSPLAYptr);
-        if (root->left == NULL) {
-            return root;
-        }
-
-        //Left left
-        if (root->left->data > data) {
-            //increase(compareCounterSPLAYptr);
-            root->left->left = splay3(root->left->left, data);
-            increase(rotateCounterSPLAYptr);
-            root = rightRotate(root);
-        }
-        else if (root->left->data < data) {
-            //increase(compareCounterSPLAYptr);
-            root->left->right = splay3(root->left->right, data);
-            if (root->left->right != NULL) {
-                increase(rotateCounterSPLAYptr);
-                root->left = leftRotate(root->left);
-            }
-        }
-        if (root->left == NULL) {
-            return root;
-        }
-        else {
-            increase(rotateCounterSPLAYptr);
-            return rightRotate(root);
-        }
-    }
-    else {
-        if (root->right == NULL) {
-            return root;
-        }
-
-        if (root->right->data > data) {
-            //increase(compareCounterSPLAYptr);
-            root->right->left = splay3(root->right->left, data);
-            if (root->right->left != NULL) {
-                increase(rotateCounterSPLAYptr);
-                root->right = rightRotate(root->right);
-            }
-        }
-        else if (root->right->data < data) {
-            //increase(compareCounterSPLAYptr);
-            root->right->right = splay3(root->right->right, data);
-            increase(rotateCounterSPLAYptr);
-            root = leftRotate(root);
-        }
-        if (root->right == NULL) {
-            return root;
-        }
-        else {
-            increase(rotateCounterSPLAYptr);
-            return leftRotate(root);
-        }
-    }
-
-
-
-}
-
 
 
 //Binary Search Tree insertion
@@ -485,7 +382,7 @@ Node* insertBST(Node *node, int data) {
 
 Node* insertSplay(Node *node, int data) {
     insertBST(node, data);
-    return splay3(node, data);
+    return splay(node, data);
 }
 
 void printPreOrder(Node *node) {
@@ -506,7 +403,7 @@ int main() {
     //printf("%d", deneme->left->data);
     //File reading
     FILE *file;
-    file = fopen("../input2.txt", "r");
+    file = fopen("../input1.txt", "r");
     if (file == NULL) {
         printf("File not found");
         return 0;
@@ -546,5 +443,21 @@ int main() {
     printf("Total Cost: %d\n", compareCounterSPLAY + rotateCounterSPLAY);
     //printf("Program finished");
 
+    printf("===================================================================================\n");
+
+    Node *node3 = newNode(10);
+    insertBST(node3,5);
+    insertBST(node3, 2);
+
+
+    /*
+    print2D(node3);
+    printf("===================================================================================\n");
+    node3 = rightRotate(node3);
+    printf("-----%d-----\n",node3->data);
+
+
+    print2D(node3);
+    */
     return 0;
 }
