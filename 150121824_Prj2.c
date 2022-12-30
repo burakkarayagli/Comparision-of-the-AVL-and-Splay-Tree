@@ -36,6 +36,8 @@ typedef struct Node{
     struct Node *right;
 }Node;
 
+Node *rootOfSplayTree;
+
 Node* newNode(int data) {
     Node *node = (Node*)malloc(sizeof(Node));
     node->data = data;
@@ -233,6 +235,8 @@ Node* insertAVL(Node *node, int data) {
 
 Node* splay(Node *root, int target) {
 
+
+
     if (root->data == target) {
         return root;
     }
@@ -240,11 +244,23 @@ Node* splay(Node *root, int target) {
     //target sag taraftaysa
     if (root->data < target) {
 
+        //target sagin sol tarafindaysa
+        if (target < root->right->data && target != root->right->left->data) {
+            root->right = splay(root->right, target);
+            return root;
+        }
+
+        //target sagin sag tarafindaysa
+        if (root->right->data < target && target != root->right->right->data) {
+            root->right = splay(root->right, target);
+            return root;
+        }
         //target sag cocuk
-        if (target == root->right->data) {
+        if (target == root->right->data && root == rootOfSplayTree) {
             root = leftRotate(root);
             return root;
         }
+
 
         //target sagin soluysa
         if (root->right->left != NULL && target == root->right->left->data) {
@@ -260,22 +276,21 @@ Node* splay(Node *root, int target) {
             return root;
         }
 
-        //target sagin sol tarafindaysa
-        if (target < root->right->data) {
-            root->right = splay(root->right, target);
-            root = leftRotate(root);
+    }
+    else {
+        //target solun sol tarafindaysa
+        if (target < root->left->data && target != root->left->left->data) {
+            root->left = splay(root->left, target);
             return root;
         }
 
-        //target sagin sag tarafindaysa
-        if (root->right->data < target) {
-            root->right = splay(root->right, target);
-            root = leftRotate(root);
+        //target solun sag tarafindaysa
+        if (root->left->data < target && target != root->left->right->data) {
+            root->left = splay(root->left, target);
+            return root;
         }
-    }
-    else {
         //target sol cocuk
-        if (target == root->left->data) {
+        if (target == root->left->data && root == rootOfSplayTree) {
             root = rightRotate(root);
             return root;
         }
@@ -294,19 +309,6 @@ Node* splay(Node *root, int target) {
             return root;
         }
 
-        //target solun sol tarafindaysa
-        if (target < root->left->data) {
-            root->left = splay(root->left, target);
-            root = rightRotate(root);
-            return root;
-        }
-
-        //target solun sag tarafindaysa
-        if (root->left->data < target) {
-            root->left = splay(root->left, target);
-            root = rightRotate(root);
-            return root;
-        }
 
 
     }
@@ -413,10 +415,16 @@ int main() {
     Node *node = newNode(data);
     Node *node2 = newNode(data);
     //printf("CHECKPOINT 1\n");
+
+    rootOfSplayTree = node2;
+
+
     while (fscanf(file, "%d", &data) != EOF) {
         //printf("CHECKPOINT 2\n");
         node = insertAVL(node, data);
         node2 = insertSplay(node2, data);
+        rootOfSplayTree = node2;
+
         //print2D(node2);
         //printf("======================\n");
     }
