@@ -235,8 +235,6 @@ Node* insertAVL(Node *node, int data) {
 
 Node* splay(Node *root, int target) {
 
-
-
     if (root->data == target) {
         return root;
     }
@@ -244,75 +242,67 @@ Node* splay(Node *root, int target) {
     //target sag taraftaysa
     if (root->data < target) {
 
-        //target sagin sol tarafindaysa
-        if (target < root->right->data && target != root->right->left->data) {
-            root->right = splay(root->right, target);
-            return root;
+        root->right = splay(root->right, target);
+
+        //Target sag cocuksa
+        if (target == root->right->data) {
+            //Eger root tum agacin rootuysa
+            if (root == rootOfSplayTree) {
+                root = leftRotate(root);
+                return root;
+            }
+            //Eger root tum agacin rootu degilse
+            else {
+                return root;
+            }
         }
 
-        //target sagin sag tarafindaysa
-        if (root->right->data < target && target != root->right->right->data) {
-            root->right = splay(root->right, target);
-            return root;
-        }
-        //target sag cocuk
-        if (target == root->right->data && root == rootOfSplayTree) {
+        //target sagin sagiysa
+        else if (root->right->right != NULL && target == root->right->right->data) {
+            root = leftRotate(root);
             root = leftRotate(root);
             return root;
         }
 
-
         //target sagin soluysa
-        if (root->right->left != NULL && target == root->right->left->data) {
+        else if (root->right->left != NULL && target == root->right->left->data) {
             root->right = rightRotate(root->right);
             root = leftRotate(root);
             return root;
         }
-
-        //target sagin sagiysa
-        if (root->right->right != NULL && target == root->right->right->data) {
-            root = leftRotate(root);
-            root = leftRotate(root);
-            return root;
-        }
-
     }
-    else {
-        //target solun sol tarafindaysa
-        if (target < root->left->data && target != root->left->left->data) {
-            root->left = splay(root->left, target);
-            return root;
-        }
 
-        //target solun sag tarafindaysa
-        if (root->left->data < target && target != root->left->right->data) {
-            root->left = splay(root->left, target);
-            return root;
-        }
-        //target sol cocuk
-        if (target == root->left->data && root == rootOfSplayTree) {
-            root = rightRotate(root);
-            return root;
+    //target sol taraftaysa
+    else {
+        root->left = splay(root->left, target);
+
+        //Target sol cocuksa
+        if (target == root->left->data) {
+            //Eger root tum agacin rootuysa
+            if (root == rootOfSplayTree) {
+                root = rightRotate(root);
+                return root;
+            }
+            //Eger root tum agacin rootu degilse
+            else {
+                return root;
+            }
         }
 
         //target solun soluysa
-        if (root->left->left != NULL && target == root->left->left->data) {
+        else if (root->left->left != NULL && target == root->left->left->data) {
             root = rightRotate(root);
             root = rightRotate(root);
             return root;
         }
 
         //target solun sagiysa
-        if (target == root->left->right->data) {
+        else if (root->left->right != NULL && target == root->left->right->data) {
             root->left = leftRotate(root->left);
             root = rightRotate(root);
             return root;
         }
-
-
-
     }
-
 }
 
 
