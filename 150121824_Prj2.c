@@ -136,11 +136,11 @@ Node* rightRotate(Node *node) {
 //TODO Make another function for binary search tree insertion
 
 Node* insertAVL(Node *node, int data) {
-    //If tree is empty
+    //Tree empty
     if (node == NULL) {
         return newNode(data);
     }
-    //Binary search tree inserting
+    //Finding pos
     if (data < node->data) {
         increase(compareCounterAVLptr);
         node->left = insertAVL(node->left, data);
@@ -149,7 +149,7 @@ Node* insertAVL(Node *node, int data) {
         increase(compareCounterAVLptr);
         node->right = insertAVL(node->right, data);
     }
-    //If node already exists
+    //If node exists
     else {
         increase(compareCounterAVLptr);
         node->frequency += 1;
@@ -175,25 +175,9 @@ Node* insertAVL(Node *node, int data) {
          z
 
     */
-
     if (balanceFactor > 1 && data < node->left->data) {
         increase(rotateCounterAVLptr);
         return rightRotate(node);
-    }
-
-    //Right Right node=x
-    /*
-
-        x
-         \
-          y
-           \
-            z
-
-     */
-    if (balanceFactor < -1 && data > node->right->data) {
-        increase(rotateCounterAVLptr);
-        return leftRotate(node);
     }
 
     //Left Right node=x
@@ -210,6 +194,21 @@ Node* insertAVL(Node *node, int data) {
         node->left = leftRotate(node->left);increase(rotateCounterAVLptr);
         increase(rotateCounterAVLptr);
         return rightRotate(node);
+    }
+
+    //Right Right node=x
+        /*
+
+        x
+         \
+          y
+           \
+            z
+
+     */
+    if (balanceFactor < -1 && data > node->right->data) {
+        increase(rotateCounterAVLptr);
+        return leftRotate(node);
     }
 
     //Right Left node=x
@@ -232,9 +231,9 @@ Node* insertAVL(Node *node, int data) {
     return node;
 }
 
-
 Node* splay(Node *root, int target) {
 
+    //base case
     if (root->data == target) {
         return root;
     }
@@ -249,6 +248,7 @@ Node* splay(Node *root, int target) {
             //Eger root tum agacin rootuysa
             if (root == rootOfSplayTree) {
                 root = leftRotate(root);
+                increase(rotateCounterSPLAYptr);
                 return root;
             }
             //Eger root tum agacin rootu degilse
@@ -260,14 +260,18 @@ Node* splay(Node *root, int target) {
         //target sagin sagiysa
         else if (root->right->right != NULL && target == root->right->right->data) {
             root = leftRotate(root);
+            increase(rotateCounterSPLAYptr);
             root = leftRotate(root);
+            increase(rotateCounterSPLAYptr);
             return root;
         }
 
         //target sagin soluysa
         else if (root->right->left != NULL && target == root->right->left->data) {
             root->right = rightRotate(root->right);
+            increase(rotateCounterSPLAYptr);
             root = leftRotate(root);
+            increase(rotateCounterSPLAYptr);
             return root;
         }
     }
@@ -281,6 +285,7 @@ Node* splay(Node *root, int target) {
             //Eger root tum agacin rootuysa
             if (root == rootOfSplayTree) {
                 root = rightRotate(root);
+                increase(rotateCounterSPLAYptr);
                 return root;
             }
             //Eger root tum agacin rootu degilse
@@ -292,19 +297,22 @@ Node* splay(Node *root, int target) {
         //target solun soluysa
         else if (root->left->left != NULL && target == root->left->left->data) {
             root = rightRotate(root);
+            increase(rotateCounterSPLAYptr);
             root = rightRotate(root);
+            increase(rotateCounterSPLAYptr);
             return root;
         }
 
         //target solun sagiysa
         else if (root->left->right != NULL && target == root->left->right->data) {
             root->left = leftRotate(root->left);
+            increase(rotateCounterSPLAYptr);
             root = rightRotate(root);
+            increase(rotateCounterSPLAYptr);
             return root;
         }
     }
 }
-
 
 //Preorder traversal
 void preorder(Node *node) {
@@ -345,23 +353,20 @@ void print2D(struct Node* root)
     print2DUtil(root, 0);
 }
 
-
-
-
 //Binary Search Tree insertion
-Node* insertBST(Node *node, int data) {
-    //If tree is empty
+Node* insertBSTforSplayTree(Node *node, int data) {
+
     if (node == NULL) {
         return newNode(data);
     }
-    //Binary search tree inserting
+
     if (data < node->data) {
         increase(compareCounterSPLAYptr);
-        node->left = insertBST(node->left, data);
+        node->left = insertBSTforSplayTree(node->left, data);
     }
     else if (data > node->data) {
         increase(compareCounterSPLAYptr);
-        node->right = insertBST(node->right, data);
+        node->right = insertBSTforSplayTree(node->right, data);
     }
     //If node already exists
     else {
@@ -373,7 +378,7 @@ Node* insertBST(Node *node, int data) {
 }
 
 Node* insertSplay(Node *node, int data) {
-    insertBST(node, data);
+    insertBSTforSplayTree(node, data);
     return splay(node, data);
 }
 
@@ -388,13 +393,14 @@ void printPreOrder(Node *node) {
     printPreOrder(node->right);
 }
 
-
 int main() {
     //printf("Program started\n");
     //Node *deneme = newNode(215);
     //printf("%d", deneme->left->data);
     //File reading
     FILE *file;
+
+    //Write the input file here
     file = fopen("../input1.txt", "r");
     if (file == NULL) {
         printf("File not found");
@@ -441,12 +447,12 @@ int main() {
     printf("Total Cost: %d\n", compareCounterSPLAY + rotateCounterSPLAY);
     //printf("Program finished");
 
+    /*
     printf("===================================================================================\n");
-
     Node *node3 = newNode(10);
     insertBST(node3,5);
     insertBST(node3, 2);
-
+    */
 
     /*
     print2D(node3);
